@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map;
+      /* The latitude / longitude values below are centered right over KEDC - LEAVE THEM. */
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 30.3241499, lng: -97.6030111},
+          zoom: 18.8
+        });
+      var marker = new google.maps.Marker({
+        position: {lat: 30.3241699, lng: -97.6030111},
+        map: map
+      });
+      var marker = new google.maps.Marker({
+        position: {lat: 30.3241699, lng: -97.6025111},
+        map: map
+      });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1v_uW5NrPLCzzUvMJLwRj8pbJaUq6hZs&callback=initMap"
+    async defer></script>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+var imported=[{"lat":30.324646666666666,"lng":-97.60325,"title":"m1","time":"","markerType":false},{"lat":30.32448,"lng":-97.60291666666666,"title":"m2","time":"","markerType":true},{"lat":30.324313333333333,"lng":-97.60291666666666,"title":"m3","time":"","markerType":true},{"lat":30.323813333333334,"lng":-97.60291666666666,"title":"m4","time":"","markerType":false}];
