@@ -40,7 +40,7 @@ var CreatePsqlButton = function() {
     var importButton = document.createElement('input');
     importButton.type = 'submit';
     importButton.addEventListener('click', this.get_table);
-    importButton.setAttribute('value', 'Import PSQL Data');
+    importButton.setAttribute('value', 'Access PSQL');
     importButton.style.color = 'blue';
     document.getElementById('divInput').appendChild(importButton);
 }

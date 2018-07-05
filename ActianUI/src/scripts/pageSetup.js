@@ -183,7 +183,7 @@ function NewPage() {
         this.createDiv('divInput', 'divInput', 'body');
         //var submit = this.addInputs('divInput', 'submit', 'submit', 'Access PSQL');
         //this.addListener2_createButt();
-        this.addLineBreak('divInput');
+        //this.addLineBreak('divInput');
     };
 
     //PURPOSE

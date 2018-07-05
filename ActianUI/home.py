@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from flask import Flask, jsonify, make_response
 import sys
 import btrieve2_access as btrieve2
