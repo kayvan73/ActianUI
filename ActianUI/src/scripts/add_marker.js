@@ -14,7 +14,7 @@
 //**************************************************************
 //*************************************************************
 
-var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status){
+var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, markerImage){  //================changed this one
 
     console.log('adding new marker');
     if (markerTitle == '###Enter Title###'){
@@ -34,7 +34,7 @@ var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status){
         var curLng = document.getElementById('lng_display');
         curLat.setAttribute('value', markerLocation.lat);
         curLng.setAttribute('value', markerLocation.lng);
-        curImage.src = "./heroImages/" + markerTitle + '.jpg'
+        curImage.src = markerImage   //=============changed this one
         divImg.style.display = 'inline';
         current_MarkerArray.currentMarker = this.GoogleMarker; //tracker object
     };

@@ -49,7 +49,7 @@ var MarkerArray = function() {
     //  1) markerList array now has 1 more element
     this.pushMarker = function(markerObject) {
         this.markerList.push(markerObject);
-        this.updateLink();    //make sure the export link is up to date with new marker
+        //this.updateLink();    //======commenting this out since no need for links ============
         //this.printMarkerList();
     }
 
@@ -92,6 +92,7 @@ var MarkerArray = function() {
         };
     }
 
+
     //PURPOSE
     //  1) the easiest way to write to client computer is to download a "blob" object
     //     this function converts the just markerList into a blob so it can be downloaded
@@ -106,20 +107,23 @@ var MarkerArray = function() {
         return fileBlob;
     }
 
+	//=================== dont need to update download link, w/ psql  the user no longer needs to ========
     //PURPOSE
     //  1) after each new marker, the new JSOn blib to download has to update to include new marker
     //INPUT
     //  1) JSOn blob
     //OUTPUT
     //  1) JSON blob
-    this.updateLink = function () {
-        markerList_Blob = this.convert2Blob();
-        //console.log('updating LInk');
-        var exportLink = document.getElementById('exportLink');
-        exportLink.setAttribute('href',  URL.createObjectURL(markerList_Blob));
-    }
+    //this.updateLink = function () {
+    //    markerList_Blob = this.convert2Blob();
+    //    //console.log('updating LInk');
+    //    var exportLink = document.getElementById('exportLink');
+    //    exportLink.setAttribute('href',  URL.createObjectURL(markerList_Blob));
+    //}
 }
 
+console.log('initializing marker array')
 var current_MarkerArray = new MarkerArray();
-current_MarkerArray.createExportLink();
-current_MarkerArray.createImportButton();
+//======commenting these 2 out
+//current_MarkerArray.createExportLink();
+//current_MarkerArray.createImportButton();

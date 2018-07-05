@@ -121,22 +121,18 @@ function NewPage() {
     };
 
 
-    //PURPOSE
-    //  1) add a Listener to createMarker button so it adds a new marker to UI
-    //OUTPUT
-    //  1) marker displays on UI
-    //  2) markerList array is updated to inlucde new marker
-    this.addListener2_createButt = function() {
-        var createButt = document.getElementById('submit');
-        createButt.style.color = 'green';
-        createButt.addEventListener('click', function() {
-           var markerTitle = document.getElementById('titleInput').value; //NOTE the .value!
-           var markerTime = document.getElementById('pictureTime').value; //NOTE the .value!
-           var checkStatus = document.getElementById('CT_checkbox').checked;//NOTE .checked!
-           var markerLocation = pageElements.calc_markerLocation();
-           var markerObject = new NewMarker(markerTitle, markerLocation, markerTime, checkStatus);
-        });
-    };
+    //=============== this is the OLD listerner for the create button ==============
+    //this.addListener2_createButt = function() {
+    //    var createButt = document.getElementById('submit');
+    //    createButt.style.color = 'green';
+    //    createButt.addEventListener('click', function() {
+    //       var markerTitle = document.getElementById('titleInput').value; //NOTE the .value!
+    //       var markerTime = document.getElementById('pictureTime').value; //NOTE the .value!
+    //       var checkStatus = document.getElementById('CT_checkbox').checked;//NOTE .checked!
+    //       var markerLocation = pageElements.calc_markerLocation();
+    //       var markerObject = new NewMarker(markerTitle, markerLocation, markerTime, checkStatus);
+    //    });
+    //};
 
 
     //PURPOSE
@@ -156,36 +152,40 @@ function NewPage() {
     };
 
 
-    //PURPOSE
-    //  1) create the initial input text boxes and input buttons needed for the app to be useful
-    //OUTPUT
-    //  1) 6 user inputable text boxes and submit button to run calcualtions
+    //========================== this is the old add input implementation ====================
+    //this.specify_newInputs = function() {
+    //    this.createDiv('divInput', 'divInput', 'body');
+    //    var lat_degrees = this.addInputs('divInput', 'lat_deg', 'number', '30');
+    //    var lat_minutes = this.addInputs('divInput', 'lat_min', 'number', '19');
+    //    var lat_seconds = this.addInputs('divInput', 'lat_sec', 'number', '4788');
+    //    this.addLineBreak('divInput');
+    //    var lng_degrees = this.addInputs('divInput', 'lng_deg', 'number', '97');
+    //    var lng_minutes = this.addInputs('divInput', 'lng_min', 'number', '36');
+    //    var lng_seconds = this.addInputs('divInput', 'lng_sec', 'number', '1950');
+    //    this.addLineBreak('divInput');
+    //    this.addText('divInput', 'Enter Time of Pic:  ')
+    //    var pictureTime = this.addInputs('divInput', 'pictureTime', 'number', 'n/a');
+    //    document.getElementById('pictureTime').style.width = '70px';
+    //    this.addText('divInput', '  Enter Title:  ')
+    //    var titleInput = this.addInputs('divInput', 'titleInput', 'string', '###Enter Title###');
+    //    //I have to send the this.addInputs function a third param. putting 'na'
+    //    //is just garabge so the function doesnt throw error
+    //    this.addText('divInput', 'CT')
+    //    var CT_checkbox = this.addInputs('divInput', 'CT_checkbox', 'checkbox', 'n/a');
+    //    this.addLineBreak('divInput');
+    //    var submit = this.addInputs('divInput', 'submit', 'submit', 'Create Marker');
+    //    this.addListener2_createButt();
+    //    this.addLineBreak('divInput');
+    //    this.addLineBreak('divInput');
+    //};
+
     this.specify_newInputs = function() {
         this.createDiv('divInput', 'divInput', 'body');
-        var lat_degrees = this.addInputs('divInput', 'lat_deg', 'number', '30');
-        var lat_minutes = this.addInputs('divInput', 'lat_min', 'number', '19');
-        var lat_seconds = this.addInputs('divInput', 'lat_sec', 'number', '4788');
-        this.addLineBreak('divInput');
-        var lng_degrees = this.addInputs('divInput', 'lng_deg', 'number', '97');
-        var lng_minutes = this.addInputs('divInput', 'lng_min', 'number', '36');
-        var lng_seconds = this.addInputs('divInput', 'lng_sec', 'number', '1950');
-        this.addLineBreak('divInput');
-        this.addText('divInput', 'Enter Time of Pic:  ')
-        var pictureTime = this.addInputs('divInput', 'pictureTime', 'number', 'n/a');
-        document.getElementById('pictureTime').style.width = '70px';
-        this.addText('divInput', '  Enter Title:  ')
-        var titleInput = this.addInputs('divInput', 'titleInput', 'string', '###Enter Title###');
-        //I have to send the this.addInputs function a third param. putting 'na'
-        //is just garabge so the function doesnt throw error
-        this.addText('divInput', 'CT')
-        var CT_checkbox = this.addInputs('divInput', 'CT_checkbox', 'checkbox', 'n/a');
-        this.addLineBreak('divInput');
-        var submit = this.addInputs('divInput', 'submit', 'submit', 'Create Marker');
-        this.addListener2_createButt();
+        //var submit = this.addInputs('divInput', 'submit', 'submit', 'Access PSQL');
+        //this.addListener2_createButt();
         this.addLineBreak('divInput');
         this.addLineBreak('divInput');
     };
-
 
     //PURPOSE
     //  1) convert DD.MM.MMMM GPS user input into Decminal degrees (ie dds) for lat and lng
@@ -214,7 +214,9 @@ function NewPage() {
 
 //*****************************
 
+console.log('creating page')
 pageElements = new NewPage();
 pageElements.addMap();
-pageElements.createTarget_popUp();
+//======commented out the two line below
+//pageElements.createTarget_popUp();
 pageElements.specify_newInputs();
