@@ -141,13 +141,13 @@ function NewPage() {
     //  1) before any clicks, there are hidden img/txt elements using display=none property
     this.createTarget_popUp = function() {
         this.createDiv('divImg', 'divImg', 'body');
-        this.createImg('divImg', './heroImages/', 'selected_img', 200, 200);
+        this.createImg('divImg', '/home/pi/Desktop/heroImages/', 'selected_img', 200, 200);
         this.addLineBreak('divImg');
         var lat_display = this.addInputs('divImg', 'lat_display', 'number', '');
         var lng_display = this.addInputs('divImg', 'lng_display', 'number', '');
         this.addLineBreak('divImg');
-        var deleteButt = this.addInputs('divImg', 'deleteButt', 'submit', 'Delete Marker');
-        this.addListener2_deleteButt();
+        //var deleteButt = this.addInputs('divImg', 'deleteButt', 'submit', 'Delete Marker');
+        //this.addListener2_deleteButt();
         document.getElementById('divImg').style.display = 'none';
     };
 
@@ -184,7 +184,6 @@ function NewPage() {
         //var submit = this.addInputs('divInput', 'submit', 'submit', 'Access PSQL');
         //this.addListener2_createButt();
         this.addLineBreak('divInput');
-        this.addLineBreak('divInput');
     };
 
     //PURPOSE
@@ -218,5 +217,5 @@ console.log('creating page')
 pageElements = new NewPage();
 pageElements.addMap();
 //======commented out the two line below
-//pageElements.createTarget_popUp();
+pageElements.createTarget_popUp();
 pageElements.specify_newInputs();

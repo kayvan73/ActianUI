@@ -16,6 +16,7 @@
 
 var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, markerImage){  //================changed this one
 
+	//console.log(markerImage)
     console.log('adding new marker');
     if (markerTitle == '###Enter Title###'){
         alert('You Have NOT Entered A Title, Enter One Now Before Coninuing')
@@ -30,11 +31,14 @@ var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, mar
     this.display_markerData = function(){
         var curImage = document.getElementById('selected_img')
         var divImg = document.getElementById('divImg');
-        var curLat = document.getElementById('lat_display');
+		var curLat = document.getElementById('lat_display');
         var curLng = document.getElementById('lng_display');
-        curLat.setAttribute('value', markerLocation.lat);
-        curLng.setAttribute('value', markerLocation.lng);
-        curImage.src = markerImage   //=============changed this one
+        curLat.setAttribute('value', this.GoogleMarker.latitude);
+        curLng.setAttribute('value', this.GoogleMarker.longitude);
+		console.log(this.GoogleMarker.latitude)
+		console.log(this.GoogleMarker.title);
+        curImage.src = this.GoogleMarker.imageLocation;   //=============changed this one
+        //curImage.src = '/home/pi/Desktop/heroImages/m1.jpg'   //=============changed this one
         divImg.style.display = 'inline';
         current_MarkerArray.currentMarker = this.GoogleMarker; //tracker object
     };
@@ -51,11 +55,14 @@ var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, mar
     //  1) marker is placed on the map
     //  2) marker and its properties pushed to our current_MarkerArray object
     this.GoogleMarker = new google.maps.Marker({
+		latitude : markerLocation.lat,
+		longitude : markerLocation.lng,
         position: {
             lat: markerLocation.lat,
             lng: markerLocation.lng
         },
         label: markerTitle,
+		imageLocation: markerImage,
         title : markerTitle,
         time : timeOfPicture,
         status: status,

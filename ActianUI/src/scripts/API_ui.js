@@ -48,10 +48,10 @@ var CreatePsqlButton = function() {
 
 var add_psqlMarkers = function(data) {
     console.log('recieved json data; beginning marker insertion')
-	console.log(data[1])
+	//console.log(data[1])
     for (i=0; i<data.length; i++) {
-		console.log(data[i][2]);
-        var psqlMarker = new NewMarker('m1', {lat: data[i][4], lng: data[i][6]}, 5, 'regular');
+		//console.log(data[i][2]);
+        var psqlMarker = new NewMarker(data[i][2], {lat: data[i][4], lng: data[i][6]}, 5, 'regular', data[i][2]);
 	}
 }
 
