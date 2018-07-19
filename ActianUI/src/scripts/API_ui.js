@@ -1,10 +1,48 @@
 console.log('handling dependencies')
-//var fetch = require("node-fetch");
-var dataURL = 'http://127.0.0.1:5000/api/allData'
+//var fetch = require("node-fetch");  --only need this line if NOT running code in browser
+var dataURL = 'http://127.0.0.1:5000/api/targetMatches'
 //var dataURL = 'http://0.0.0.0:5000/api/allData'
-
 //var imagesURL = 'http://127.0.0.1:5000/api/images'
 //var coordinatesURL = 'http://127.0.0.1:5000/api/coordinates'
+
+
+var CreatePsqlButton = function() {
+    var importButton = document.createElement('input');
+    importButton.type = 'submit';
+    importButton.addEventListener('click', this.get_table);
+    importButton.setAttribute('value', 'Access PSQL');
+    importButton.style.color = 'blue';
+    document.getElementById('divInput').appendChild(importButton);
+}
+
+
+var add_psqlMarkers = function(data) {
+    console.log('recieved json data; beginning marker insertion')
+	//console.log(data[1])
+    for (i=0; i<data.length; i++) {
+		//console.log(data[i][2]);
+        // (title, location, time, status, img
+        var time = String(data[i][11]) + ':' + String(data[i][10]) + ':' + String(data[i][9]) 
+        //figure out a way to just grab the name of jpg file w/o the .jpg
+        //one way i can accomplish this is by saving the title in the db w/o the .jpg
+        var psqlMarker = new NewMarker(data[i][2], {lat: data[i][4], lng: data[i][6]}, time, 'regular', data[i][2]);
+	}
+}
+
+
+var get_table = function() {
+   var parentPromise = fetch(dataURL)     //get the HTTP promise
+   var parentPromise_json = parentPromise.then(function(response) {  //use .then() to access parent promise
+	return(response.json())        //get the json attribute of the parent promise
+   })
+   parentPromise_json.then(function(data) {
+	   console.log(data)
+       add_psqlMarkers(data['results'])  //simplifying the output of the function to make processing easier
+   })
+}
+
+console.log('creating import button')
+CreatePsqlButton()
 
 
 //var get_images = function() {
@@ -36,39 +74,6 @@ var dataURL = 'http://127.0.0.1:5000/api/allData'
 //        return (data)                       //use .then() to access the json promise and get json data
 //    })
 //}
-var CreatePsqlButton = function() {
-    var importButton = document.createElement('input');
-    importButton.type = 'submit';
-    importButton.addEventListener('click', this.get_table);
-    importButton.setAttribute('value', 'Access PSQL');
-    importButton.style.color = 'blue';
-    document.getElementById('divInput').appendChild(importButton);
-}
-
-
-var add_psqlMarkers = function(data) {
-    console.log('recieved json data; beginning marker insertion')
-	//console.log(data[1])
-    for (i=0; i<data.length; i++) {
-		//console.log(data[i][2]);
-        var psqlMarker = new NewMarker(data[i][2], {lat: data[i][4], lng: data[i][6]}, 5, 'regular', data[i][2]);
-	}
-}
-
-
-var get_table = function() {
-   var parentPromise = fetch(dataURL)     //get the HTTP promise
-   var parentPromise_json = parentPromise.then(function(response) {  //use .then() to access parent promise
-	return(response.json())        //get the json attribute of the parent promise
-   })
-   parentPromise_json.then(function(data) {
-	   console.log(data)
-       add_psqlMarkers(data['results'])  //simplifying the output of the function to make processing easier
-   })
-}
-
-console.log('creating import button')
-CreatePsqlButton()
 //get_table(dataURL)
 
 
