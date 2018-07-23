@@ -29,8 +29,8 @@ rc = btrieveIndexAttributes.AddKeySegment(btrieveKeySegment)
 rc = btrieveIndexAttributes.SetDuplicateMode(False)
 rc = btrieveIndexAttributes.SetModifiable(True)
 # Create the file:
-rc = btrieveClient.FileCreate(btrieveFileAttributes, btrieveIndexAttributes,
-btrieveFileName, btrv.Btrieve.CREATE_MODE_OVERWRITE)
+#rc = btrieveClient.FileCreate(btrieveFileAttributes, btrieveIndexAttributes,
+#btrieveFileName, btrv.Btrieve.CREATE_MODE_OVERWRITE)
 # Allocate a file object:
 btrieveFile = btrv.BtrieveFile()
 # Open the file:
