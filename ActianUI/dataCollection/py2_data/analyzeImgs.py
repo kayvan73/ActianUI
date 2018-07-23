@@ -13,7 +13,7 @@ import flightTable_py2_access as flightTb
 for i in range(4):
     sleep(20)
     print('inserting')
-    img = '/home/pi/Desktop/heroImages/m' + str(i) + '.jpg'
+    img = '../../javascriptUI//heroImages/m' + str(i) + '.jpg'
     GPS = flightTb.get_last()
     targetTb.insertRecord(img, GPS[2], GPS[4], GPS[7], GPS[8], GPS[9])
 

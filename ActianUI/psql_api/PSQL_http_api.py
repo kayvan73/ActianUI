@@ -2,8 +2,8 @@
 from flask import Flask, jsonify, make_response
 import sys
 import os
-sys.path.insert(0, '../dataCollection/py3_data')
-#import targetTable_py2_access as targetTb
+print(os.getcwd())
+sys.path.insert(0, 'dataCollection/py3_data')
 import targetTable_py3_access as targetTb
 
 
