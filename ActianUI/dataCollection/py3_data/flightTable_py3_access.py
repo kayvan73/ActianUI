@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 from time import strftime
 import struct
-sys.path.insert(0, '/usr/local/psql/swigFiles')  #need these to talk to btrieve2
+sys.path.insert(0, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
 import btrievePython as btrv
 os.chdir('/usr/local/psql/data/DEMODATA')
 btrieveFileName = 'FlightTable.mkd'

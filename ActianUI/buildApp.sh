@@ -7,6 +7,6 @@ whoami
 echo starting scripts
 echo ----------------------------------------
 su - psql
-python3 /home/pi/Desktop/ActianUI/ActianUI/home.py &
+python3 ./psql_api/PSQL_http_api.py
 word
-chromium-browser ./src/index.html
+chromium-browser ./javascriptUI/index.html

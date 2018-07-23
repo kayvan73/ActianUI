@@ -15,9 +15,9 @@ GrantPermissions:
 	@echo "======================================="
 	@whoami
 	@echo "granting permissions"
-	@sudo chmod 777 /home/pi/Desktop
-	@sudo chmod 777 /home/pi/Desktop/ActianUI/ActianUI/* #give psql user access to foo.jpg and to oldImages folder
-	@sudo chmod +x ./home.py
+	@sudo chmod 777 *
+	@sudo chmod 777 ../../ActianUI #give psql user access to foo.jpg and to oldImages folder
+	@sudo chmod +x ./psql_api/PSQL_http_api.py
 
 	
 RunScripts: GrantPermissions
