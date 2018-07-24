@@ -3,9 +3,13 @@ import sys
 from datetime import datetime
 from time import strftime
 import struct
-sys.path.insert(0, 'swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+sys.path.append('swigFiles/swigFiles_py3')  #need these to talk to btrieve2
 import btrievePython as btrv
+currentPath = os.getcwd()
+#print(currentPath)
 os.chdir('/usr/local/psql/data/DEMODATA')
+
+
 btrieveFileName = 'TargetTable.mkd'
 recordFormat = '<iB50sBdBdBBBBB'
 #i = integer (for the IDENTITY, 4bytes)
@@ -81,6 +85,13 @@ def closeTable():
          print('File closed successful!')
     else:
          print('File close failed - status: ', rc)
+
+# ============================
+os.chdir(currentPath) 
+# ===========================
+#this is a real hack. to access the psql db's, i need to 
+#chnage directory. sys.path.append / sys.path.isnert only works on importing python
+#modules, not other files. thus, after im done, i have to change the path back to orignal
 
 
 if __name__ == '__main__':
