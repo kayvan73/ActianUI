@@ -6,18 +6,19 @@ import sys
 from datetime import datetime
 from time import strftime
 import struct
-print(os.getcwd())
+#print(os.getcwd())
 sys.path.insert(1, '../../swigFiles/swigFiles_py2')  #need these to talk to btrieve2
 import btrievePython as btrv
 os.chdir('../../PSQL')
-btrieveFileName = 'BigBoi.mkd'
-recordFormat = '<iB8sBdBd'
+#btrieveFileName = 'BigBoi.mkd'
+btrieveFileName = 'ImgTest.mkd'
+recordFormat = '<iB8s'
+#recordFormat = '<iB4s4sBdBd'
 #i = integer (for the IDENTITY, 4bytes)
 #B = null byte(goes in between columns, 1byte)
 #d = double (8bytes)
 #s = char
-#BBBB = for the TIME datatype byte for sec,time,hour,PM/AM
-recordLength = 31
+recordLength = 13
 keyFormat = '<i'
 
 
@@ -34,13 +35,6 @@ rc = btrieveIndexAttributes.AddKeySegment(btrieveKeySegment)
 rc = btrieveIndexAttributes.SetDuplicateMode(False)
 rc = btrieveIndexAttributes.SetModifiable(True)
 
-#================================
-# These 2 lines below "Create the file:" will completly delte and and recreate the table
-# ONLY use them if you are looking to clear the table
-#===============================
-# Create the file:
-#rc = btrieveClient.FileCreate(btrieveFileAttributes, btrieveIndexAttributes,
-#btrieveFileName, btrv.Btrieve.CREATE_MODE_OVERWRITE)
 
 # Allocate a file object:
 btrieveFile = btrv.BtrieveFile()
@@ -52,29 +46,19 @@ else:
      print('File open failed - status: ', rc, '\n')
 
 
-#SELECT * FROM FlightTable.mkd
-def select_all():
-    selectALL = []
-    #recordFormat = '<iBs50BdBdBBBBB'
-    record = struct.pack(recordFormat, 0, 0, bytes(8), 0, 0, 0, 0)
-    readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
-    print(readLength)
-    while (readLength > 0):
-        humanReadable_record = (struct.unpack(recordFormat, record))
-        readLength = btrieveFile.RecordRetrieveNext(record, 0)
-        selectALL.append(humanReadable_record)
-    #closeTable()
-    return (selectALL)
-
-
 def get_last():
-    #record = struct.pack(recordFormat,  0, 0, bytes(8), 0, 0, 0, 0)
-    identifier=5
-    record = struct.pack(recordFormat, identifier, 0, bytes(8), 0, 0, 0, 0)
-    rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
-    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
-    #readLength = btrieveFile.RecordRetrieveLast(btrv.Btrieve.INDEX_1, record, 0)
-    unpacked_record = struct.unpack(recordFormat, record)
+    # =============================
+    # if you are trying to get a specific record based on index
+    #identifier=1
+    #record = struct.pack(recordFormat, identifier, 0, bytes(8))
+    #rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
+    #assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+    # ==================================
+    # my method of record retireval
+    record = struct.pack(recordFormat,  0, 0, bytes(8))
+    readLength = btrieveFile.RecordRetrieveLast(btrv.Btrieve.INDEX_1, record, 0)
+    #unpacked_record = struct.unpack(recordFormat, record)
+    # ===================================
 
     maxBlobSize = 1024 * 1024
     blob = bytes(maxBlobSize)
@@ -83,18 +67,15 @@ def get_last():
     
     bytesob = io.BytesIO(blob)
     im = Image.open(bytesob)
-    #print(im.format)
-    #print(im.size)
-    #print(im.mode)
+    print(im.format)
+    print(im.size)
+    print(im.mode)
     im.save('DONT_NEED_BYTES.jpg', 'JPEG')
     return (unpacked_record)
 
 
 def insertRecord(imglocation, lat, lng):
-    #time = datetime.now()
-    #print(time)
-    record = struct.pack(recordFormat, 0, 0, bytes(8), 0, lat, 0, lng)
-    #PCC interprets the 4bytes of the TIME datayte as PM/AM, sec, min, hour
+    record = struct.pack(recordFormat, 0, 0, bytes(8))
     rc = btrieveFile.RecordCreate(record)
     if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):
          print(' Insert successful!')
@@ -126,7 +107,7 @@ def closeTable():
 
 
 if __name__ == '__main__':
-    insertRecord('../javascriptUI/heroImages/m1.jpg', 345, 678)
+    #insertRecord('../javascriptUI/heroImages/m1.jpg', 345, 678)
     #Data = select_all()
     #print(Data)
     lastRow = get_last()
