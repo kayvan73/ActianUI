@@ -6,8 +6,8 @@ from time import strftime
 import struct
 sys.path.insert(0, '../../swigFiles/swig_py2')  #need these to talk to btrieve2
 import btrievePython as btrv
-os.chdir('/usr/local/psql/data/DEMODATA')
-btrieveFileName = 'FlightTable.mkd'
+os.chdir('../../btrieveFiles')
+btrieveFileName = 'FullFlightReport.mkd'
 recordFormat = '<iBdBdBBBBB'
 #i = integer (for the IDENTITY, 4bytes)
 #B = null byte(goes in between columns, 1byte)
@@ -17,35 +17,46 @@ recordLength = 27
 keyFormat = '<i'
 
 
-# Create a session:
-btrieveClient = btrv.BtrieveClient(0x4232, 0) # ServiceAgent=B2
-# Specify FileAttributes for the new file:
-btrieveFileAttributes = btrv.BtrieveFileAttributes()
-rc = btrieveFileAttributes.SetFixedRecordLength(recordLength)
-# Specify Key 0 as an autoinc:
-btrieveKeySegment = btrv.BtrieveKeySegment()
-rc = btrieveKeySegment.SetField(0, 4, btrv.Btrieve.DATA_TYPE_AUTOINCREMENT)
-btrieveIndexAttributes = btrv.BtrieveIndexAttributes()
-rc = btrieveIndexAttributes.AddKeySegment(btrieveKeySegment)
-rc = btrieveIndexAttributes.SetDuplicateMode(False)
-rc = btrieveIndexAttributes.SetModifiable(True)
+btrieveClient = btrv.BtrieveClient(0x4232, 0)
+assert(btrieveClient != None)
 
-#================================
-# These 2 lines below "Create the file:" will completly delte and and recreate the table
-# ONLY use them if you are looking to clear the table
-#===============================
-# Create the file:
-#rc = btrieveClient.FileCreate(btrieveFileAttributes, btrieveIndexAttributes,
-#btrieveFileName, btrv.Btrieve.CREATE_MODE_OVERWRITE)
-
-# Allocate a file object:
 btrieveFile = btrv.BtrieveFile()
-# Open the file:
+assert(btrieveFile != None)
+
 rc = btrieveClient.FileOpen(btrieveFile, btrieveFileName, None, btrv.Btrieve.OPEN_MODE_NORMAL)
-if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):
-     print('File open successful!\n')
-else:
-     print('File open failed - status: ', rc, '\n')
+
+# Create the Btrieve image file if necessary.
+if (rc == btrv.Btrieve.STATUS_CODE_FILE_NOT_FOUND):
+    print('creating new table')
+    btrieveKeySegment = btrv.BtrieveKeySegment()
+    assert(btrieveKeySegment != None)
+
+    rc = btrieveKeySegment.SetField(0, 4, btrv.Btrieve.DATA_TYPE_AUTOINCREMENT)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+
+    btrieveIndexAttributes = btrv.BtrieveIndexAttributes()
+    assert(btrieveIndexAttributes != None)
+
+    rc = btrieveIndexAttributes.AddKeySegment(btrieveKeySegment)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+
+    rc = btrieveIndexAttributes.SetModifiable(False)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+
+    btrieveFileAttributes = btrv.BtrieveFileAttributes()
+    assert(btrieveFileAttributes != None)
+
+    rc = btrieveFileAttributes.SetFixedRecordLength(recordLength)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+
+    rc = btrieveClient.FileCreate(btrieveFileAttributes, btrieveIndexAttributes, btrieveFileName, btrv.Btrieve.CREATE_MODE_NO_OVERWRITE)
+    #print(rc)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+
+    rc = btrieveClient.FileOpen(btrieveFile, btrieveFileName, None, btrv.Btrieve.OPEN_MODE_NORMAL)
+    assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
+    
+print('File Open Successfull!')
 
 
 #SELECT * FROM FlightTable.mkd
