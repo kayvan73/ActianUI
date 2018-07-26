@@ -1,4 +1,6 @@
 #!/usr/bin/env python2.7
+
+
 import io
 from PIL import Image
 import os
@@ -6,6 +8,11 @@ import sys
 from datetime import datetime
 from time import strftime
 import struct
+import imageio
+import visvis as vv
+
+
+
 #print(os.getcwd())
 sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
 import btrievePython as btrv
@@ -23,10 +30,10 @@ os.chdir('../../btrieveFiles')
 #s = char
 
 btrieveFileName = 'TargetMatches.mkd'
-recordFormat = '<iBdBdB30sBII'
-#the B's in between columns are so the file is SQL compliant
+recordFormat = '<idd30sII' 
+#NO null byte B's in b/n columns because DDF builder doesnt like those
 #identity, lat, lng, title, blobOffset, blobSize
-recordLength = 62
+recordLength = 58
 #the above settings are for when you want to construct entire table in 
 #btrieve and then go back into pcc to do ddf building
 
@@ -79,8 +86,8 @@ print('File Open Successfull!')
 
 def select_all():
     selectALL = []
-    #recordFormat = '<iBdBdB30sBII'
-    record = struct.pack(recordFormat, 0, 0, 0, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0)
+    #recordFormat = '<idd30sII'
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     print(readLength)
     while (readLength > 0):
@@ -93,8 +100,8 @@ def select_all():
 def get_last():
     # =============================
     # if you are trying to get a specific record based on index
-    identifier=2
-    record = struct.pack(recordFormat, identifier, 0, 0, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0)
+    identifier=1
+    record = struct.pack(recordFormat, identifier, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
     rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
     print(rc)
     assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
@@ -116,10 +123,13 @@ def get_last():
     #print(rc)
     assert(rc >= 0)
     
-    im = Image.open(io.BytesIO(blob))
-    print(im.format)
-    print(im.size)
-    print(im.mode)
+    im = imageio.imread(blob)
+    print(type(im))
+    #vv.imshow(im)
+    #im = Image.open(io.BytesIO(blob))
+    #print(im.format)
+    #print(im.size)
+    #print(im.mode)
     #im.save('DONT_NEED_BYTES.jpg', 'JPEG')
     return (unPacked)
 
@@ -135,7 +145,7 @@ def insertRecord(lat, lng, title, imgBlob):
     blobOffset = recordLength
 
     #recordFormat = '<iBdBdB30sBII'
-    record = struct.pack(recordFormat, 0, 0, lat, 0, lng, 0, title.ljust(30).encode('UTF-8'), 0, blobOffset, blobSize)
+    record = struct.pack(recordFormat, 0, lat, lng, title.ljust(30).encode('UTF-8'), blobOffset, blobSize)
     rc = btrieveFile.RecordCreate(record)
     if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):
          print(' Insert successful!')
