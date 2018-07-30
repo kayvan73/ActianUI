@@ -3,18 +3,40 @@ from flask import Flask, jsonify, make_response
 import sys
 import os
 print(os.getcwd())
-sys.path.insert(1, 'dataCollection/py3_data')
-import targetTable_py3_access as targetTb
+sys.path.insert(1, '../flightAnalysis/psql_targetMatches/')
+import store_TargetMatches as targetTb
+sys.path.insert(1, '../flightAnalysis/psql_fullReport/')
+import videoTable_py3_access as videoTb
 
 
 
 app = Flask(__name__)
 
-@app.route('/api/targetMatches')
-def get_targetData():
-    Data = targetTb.select_all()
-    Data_dict = {'results': Data}
-    jsonDict = jsonify(Data_dict)
+#@app.route('/api/targetMatches')
+#def get_targetData():
+#    Data = targetTb.select_all()
+#    Data_dict = {'results': Data}
+#    jsonDict = jsonify(Data_dict)
+#    finalResponse = make_response(jsonDict)
+#    finalResponse.headers['Access-Control-Allow-Origin'] = '*'
+#    return(finalResponse)
+
+
+@app.route('/api/targetImages')
+def get_imageData():
+    imgBlobs = targetTb.get_images()
+    imgDict = {'results': imgBlobs}
+    jsonDict = jsonify(imgDict)
+    finalResponse = make_response(jsonDict)
+    finalResponse.headers['Access-Control-Allow-Origin'] = '*'
+    return(finalResponse)
+    
+
+@app.route('/api/targetVideo')
+def get_VideoData():
+    vidBlobs = videoTb.get_videos()
+    vidDict = {'results': vidBlobs}
+    jsonDict = jsonify(vidDict)
     finalResponse = make_response(jsonDict)
     finalResponse.headers['Access-Control-Allow-Origin'] = '*'
     return(finalResponse)

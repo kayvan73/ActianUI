@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
 
+import base64
 import io
-from PIL import Image
+#from PIL import Image
 import os
 import sys
 from datetime import datetime
 from time import strftime
 import struct
 import imageio
-import visvis as vv
+#import visvis as vv
 
 
 
 #print(os.getcwd())
-sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+#sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
 import btrievePython as btrv
-os.chdir('../../btrieveFiles')
+#os.chdir('../../btrieveFiles')
+os.chdir('../btrieveFiles')
 #there are two I terms because the header of the blob files
 #is comprised of 2 intergers - one for the offset of the 
 #blob from where the record currently is (should be the length of
@@ -96,6 +99,27 @@ def select_all():
     return (selectALL)
 
 
+def get_videos():
+    record = struct.pack(recordFormat, 0, 0, 0)
+    readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
+    print(readLength)
+    maxBlobSize = 10000000
+    blobArray = []
+    while (readLength > 0):
+        humanReadable_record = (struct.unpack(recordFormat, record))
+        print(humanReadable_record)
+        readLength = btrieveFile.RecordRetrieveNext(record, 0)
+        #print(readLength)
+        #selectALL.append(humanReadable_record)
+        blob = bytes(maxBlobSize)
+        rc = btrieveFile.RecordRetrieveChunk(recordLength, maxBlobSize, blob)
+        blobArray.append(base64.b64encode(blob))  #NOTE the binary image data NEEDS to be ascii encoded to prevent corruption
+    #print(rc)
+    assert(rc >= 0)
+    return (blobArray)
+
+
+
 def get_last():
     # =============================
     # if you are trying to get a specific record based on index
@@ -122,8 +146,26 @@ def get_last():
     #print(rc)
     assert(rc >= 0)
 
-    vid = imageio.imread(blob, format='mp4')
-    #vv.imshow(vid)
+    print(type(blob))
+
+    #myvol = imageio.volread(blob, format='mp4')
+    #savedvid = imageio.volwrite('NOBYTES.mp4', myvol, format='mp4')
+    # a volume is NOT a gernal blob of data - CANT use this
+
+    #myvid = imageio.mimread(blob, format='mp4', memtest=False)
+    
+
+    # ============================
+    # this method works but is slow
+    reader = imageio.get_reader(blob, format='mp4')
+    #fps = reader.get_meta_data()
+    #print(fps)
+    writer=imageio.get_writer('NOBYTES.mp4', fps=5.0)
+    for frame in reader:
+        print('in loop')
+        writer.append_data(frame)
+    writer.close()
+    # ============================
     
     #im = Image.open(io.BytesIO(blob))
     #print(im.format)
@@ -185,8 +227,8 @@ if __name__ == '__main__':
     #insertRecord(vidBlob)
     Data = select_all()
     print(Data)
-    lastRow = get_last()
-    print(lastRow)
+    #lastRow = get_last()
+    #print(lastRow)
     closeTable()
 
 

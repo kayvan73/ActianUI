@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-
+import base64
 import io
 from PIL import Image
 import os
@@ -9,14 +9,16 @@ from datetime import datetime
 from time import strftime
 import struct
 import imageio
-import visvis as vv
+#import visvis as vv
 
 
 
-#print(os.getcwd())
-sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+print(os.getcwd())
+#sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
 import btrievePython as btrv
-os.chdir('../../btrieveFiles')
+#os.chdir('../../btrieveFiles')
+os.chdir('../btrieveFiles')
 #there are two I terms because the header of the blob files
 #is comprised of 2 intergers - one for the offset of the 
 #blob from where the record currently is (should be the length of
@@ -97,6 +99,29 @@ def select_all():
     return (selectALL)
 
 
+def get_images():
+    #selectALL = []
+    #recordFormat = '<idd30sII'
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
+    readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
+    print(readLength)
+    maxBlobSize = 1024 * 1024
+    blobArray = []
+    while (readLength > 0):
+        humanReadable_record = (struct.unpack(recordFormat, record))
+        print(humanReadable_record)
+        readLength = btrieveFile.RecordRetrieveNext(record, 0)
+        #print(readLength)
+        #selectALL.append(humanReadable_record)
+        blob = bytes(maxBlobSize)
+        rc = btrieveFile.RecordRetrieveChunk(recordLength, maxBlobSize, blob)
+        blobArray.append(base64.b64encode(blob))  #NOTE the binary image data NEEDS to be ascii encoded to prevent corruption
+    #print(rc)
+    assert(rc >= 0)
+    return (blobArray)
+
+
+
 def get_last():
     # =============================
     # if you are trying to get a specific record based on index
@@ -124,7 +149,9 @@ def get_last():
     assert(rc >= 0)
     
     im = imageio.imread(blob)
-    print(type(im))
+    saved = imageio.imwrite('NOBYTES.jpg', im, format='jpg')
+    #vv.imshow(im)
+    #print(type(im))
     #vv.imshow(im)
     #im = Image.open(io.BytesIO(blob))
     #print(im.format)
@@ -179,17 +206,23 @@ def closeTable():
 if __name__ == '__main__':
     #os.chdir('../../btrieveFiles')
     #imglocation = '../javascriptUI/heroImages/m1.jpg'
-    imglocation = '/home/pi/Desktop/foo2.jpg'
-    realPath = os.path.realpath(imglocation)
-    print('the path of the image is: ' + str(realPath))
-    blobFile = open(realPath, mode='rb')
-    imgBlob = blobFile.read()
-    blobFile.close()
-    #insertRecord(501, 667, 'foo', imgBlob)
+    #imglocation = '/home/pi/Desktop/red-x.jpg'
+    #imglocation = '/home/pi/Desktop/pixhawk2.jpg'
+    #imglocation = '/home/pi/Desktop/cropped_panda.jpg'
+    #realPath = os.path.realpath(imglocation)
+    #print('the path of the image is: ' + str(realPath))
+    #blobFile = open(realPath, mode='rb')
+    #imgBlob = blobFile.read()
+    #blobFile.close()
+    #insertRecord(501, 667, 'panda', imgBlob)
     Data = select_all()
     print(Data)
-    lastRow = get_last()
-    print(lastRow)
+    #lastRow = get_last()
+    #print(lastRow)
+    imgList = get_images()
+    for i in range(len(imgList)):
+        print(len(imgList[i]))
+
     closeTable()
 
 
