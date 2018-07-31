@@ -12,8 +12,19 @@ from time import sleep
 import os
 import sys
 #import subprocess #we need to start our imgRec script in the background once connection is established in this script
-sys.path.insert(0, '../../swigFiles/swig_py2')  #need these to talk to btrieve2
+
+
 import flightTable_py2_access as flightTb
+
+print(os.getcwd())
+curdir = os.getcwd()
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_fullReport'):
+    os.chdir('../../btrieveFiles')
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    os.chdir('./btrieveFiles')
+else :
+    os.chdir('../btrieveFiles')
+print(os.getcwd())
 
 #test that you can connect to the table
 data = flightTb.select_all_flightData()
@@ -52,7 +63,7 @@ print( "=======================================")
 for i in range(180):
     print ("...................")
     print (" Global Location (relative altitude): %s" % vehicle.location.global_frame)
-    flightTb.insertRecord_flightTable(vehicle.location.global_frame.lat, vehicle.location.global_frame.lon)
+    flightTb.insertRecord(vehicle.location.global_frame.lat, vehicle.location.global_frame.lon)
     sleep(1) 
 
 # Close vehicle object before exiting script

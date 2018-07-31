@@ -4,16 +4,34 @@ import sys
 from datetime import datetime
 from time import strftime
 import struct
-sys.path.insert(0, '../../swigFiles/swig_py2')  #need these to talk to btrieve2
-import btrievePython as btrv
-os.chdir('../../btrieveFiles')
+
+
+print(os.getcwd())
+curdir = os.getcwd()
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_fullReport'):
+    sys.path.insert(1, '../../swigFiles/swigFiles_py2')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../../btrieveFiles')
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    sys.path.insert(1, './swigFiles/swigFiles_py2')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('./btrieveFiles')
+else :
+    sys.path.insert(1, '../swigFiles/swigFiles_py2')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../btrieveFiles')
+print(os.getcwd())
+
+
+
+
 btrieveFileName = 'FullFlightReport.mkd'
-recordFormat = '<iBdBdBBBBB'
+recordFormat = '<iddBBBB'
+#recordFormat = '<iBdBdBBBBB'  #this is the old format when i was obsesses w/ PCC compliance
 #i = integer (for the IDENTITY, 4bytes)
-#B = null byte(goes in between columns, 1byte)
 #d = double (8bytes)
-#BBH = unsigned short integer +Byte+Byte(for the TIME datatype - look at lindas example for clarification)
-recordLength = 27
+#BBBB = Byte for pm/am, hour, min, sec
+recordLength = 24
 keyFormat = '<i'
 
 
@@ -63,19 +81,20 @@ print('File Open Successfull!')
 def select_all():
     selectALL = []
     #id, nullByte, lng, nullByte, lat, nullByte, hourByte, minuteByte, secondByte, time
-    #recordFormat = '<iBdBdBBBBB'
-    record = struct.pack(recordFormat, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    #recordFormat = '<iddBBBB'
+    record = struct.pack(recordFormat, 0, 0, 0, 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     print(readLength)
     while (readLength > 0):
         humanReadable_record = (struct.unpack(recordFormat, record))
-        readLength = btrieveFile.RecordRetrieveNext(record, 0)
         selectALL.append(humanReadable_record)
+        readLength = btrieveFile.RecordRetrieveNext(record, 0)
+        #selectALL.append(humanReadable_record)
     return (selectALL)
 
 
 def get_last():
-    record = struct.pack(recordFormat, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    record = struct.pack(recordFormat, 0, 0, 0, 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveLast(btrv.Btrieve.INDEX_1, record, 0)
     unpacked_record = struct.unpack(recordFormat, record)
     #print(unpacked_record)
@@ -85,7 +104,7 @@ def get_last():
 def insertRecord(lat, lng):
     time = datetime.now()
     print(time)
-    record = struct.pack(recordFormat, 0, 0, lat, 0, lng, 0, 1, time.second, time.minute, time.hour) 
+    record = struct.pack(recordFormat, 0, lat, lng, 1, time.second, time.minute, time.hour) 
     #PCC interprets the 4bytes of the TIME datayte as PM/AM, sec, min, hour
     rc = btrieveFile.RecordCreate(record)
     if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):

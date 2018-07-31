@@ -1,9 +1,27 @@
 #!/usr/bin/env python2.7
 from time import sleep
 import sys
-sys.path.insert(0, '../../swigFiles/swig_py2')  #need these to talk to btrieve2
-import targetTable_py2_access as targetTb
-import flightTable_py2_access as flightTb
+
+
+print(os.getcwd())
+curdir = os.getcwd()
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/movidius'):
+    sys.path.insert(1, '../psql_fullReport')  #need these to talk to btrieve2
+    import targetTable_py2_access as targetTb
+    import flightTable_py2_access as flightTb
+    os.chdir('../../btrieveFiles')
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    sys.path.insert(1, './flightAnalysis/psql_fullReport')  #need these to talk to btrieve2
+    import targetTable_py2_access as targetTb
+    import flightTable_py2_access as flightTb
+    os.chdir('./btrieveFiles')
+else :
+    sys.path.insert(1, '../flightAnalysis/psql_fullReport')  #need these to talk to btrieve2
+    import targetTable_py2_access as targetTb
+    import flightTable_py2_access as flightTb
+    os.chdir('../btrieveFiles')
+print(os.getcwd())
+
 
 
 #just to test that the import and the function in that import work
