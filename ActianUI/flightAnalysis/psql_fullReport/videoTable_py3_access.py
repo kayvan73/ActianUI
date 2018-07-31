@@ -12,13 +12,25 @@ import imageio
 #import visvis as vv
 
 
+#I have the below code so that no matter where i run this file 
+#it will be able to import the correct files form the correct places
+print(os.getcwd())
+curdir = os.getcwd()
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_fullReport'):
+    sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../../btrieveFiles')
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    sys.path.insert(1, './swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('./btrieveFiles')
+else :
+    sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../btrieveFiles')
+print(os.getcwd())
 
-#print(os.getcwd())
-#sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
-sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
-import btrievePython as btrv
-#os.chdir('../../btrieveFiles')
-os.chdir('../btrieveFiles')
+
 #there are two I terms because the header of the blob files
 #is comprised of 2 intergers - one for the offset of the 
 #blob from where the record currently is (should be the length of
@@ -31,7 +43,8 @@ os.chdir('../btrieveFiles')
 #d = double (8bytes)
 #s = char
 
-btrieveFileName = 'VideoRecordings.mkd'
+#btrieveFileName = 'VideoRecordings.mkd'
+btrieveFileName = 'Videos.mkd'
 recordFormat = '<iII'
 #the B's in between columns are so the file is SQL compliant
 #identity, lat, lng, title, blobOffset, blobSize
@@ -86,45 +99,46 @@ if (rc == btrv.Btrieve.STATUS_CODE_FILE_NOT_FOUND):
 print('File Open Successfull!')
 
 
-def select_all():
-    selectALL = []
+def select_fixedRecords():
+    fixedRecords = []
     #recordFormat = '<iII'
     record = struct.pack(recordFormat, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     print(readLength)
     while (readLength > 0):
-        humanReadable_record = (struct.unpack(recordFormat, record))
+        unpacked_record = (struct.unpack(recordFormat, record))
         readLength = btrieveFile.RecordRetrieveNext(record, 0)
-        selectALL.append(humanReadable_record)
-    return (selectALL)
+        fixedRecords.append(unpacked_record)
+    return (fixedRecords)
 
 
-def get_videos():
-    record = struct.pack(recordFormat, 0, 0, 0)
-    readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
-    print(readLength)
-    maxBlobSize = 10000000
+def select_range(lowerRange, upperRange):
+
+    maxBlobSize = 6000000
     blobArray = []
-    while (readLength > 0):
-        humanReadable_record = (struct.unpack(recordFormat, record))
-        print(humanReadable_record)
-        readLength = btrieveFile.RecordRetrieveNext(record, 0)
-        #print(readLength)
-        #selectALL.append(humanReadable_record)
+    fixedRecords = []
+    for i in range(lowerRange, upperRange+1):   #need the +1 othwise python will NOT iterate through upperRange
+        record = struct.pack(recordFormat, i, 0, 0) #NOTE the i term in the packing
+        rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
+        #print(rc)
+        assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
         blob = bytes(maxBlobSize)
         rc = btrieveFile.RecordRetrieveChunk(recordLength, maxBlobSize, blob)
         blobArray.append(base64.b64encode(blob))  #NOTE the binary image data NEEDS to be ascii encoded to prevent corruption
-    #print(rc)
-    assert(rc >= 0)
-    return (blobArray)
+        unpacked_record = (struct.unpack(recordFormat, record))
+        print(unpacked_record)
+        fixedRecords.append(unpacked_record)
+
+    return (blobArray)  #NOTE that i return a dict 
 
 
 
-def get_last():
-    # =============================
-    # if you are trying to get a specific record based on index
-    identifier=1
-    record = struct.pack(recordFormat, identifier, 0, 0)
+# =============================
+# if you are trying to get a specific record based on index
+# =============================
+def get_row(rowNum):
+
+    record = struct.pack(recordFormat, rowNum, 0, 0)
     rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
     print(rc)
     assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
@@ -133,46 +147,28 @@ def get_last():
     print(' ==================================')
     print(unPacked)
     print(' ==================================')
-    # ===================================
-    # my method of record retireval
-    #record = struct.pack(recordFormat,  0, 0, bytes(8))
-    #readLength = btrieveFile.RecordRetrieveLast(btrv.Btrieve.INDEX_1, record, 0)
-    #unpacked_record = struct.unpack(recordFormat, record)
-    # ===================================
 
-    maxBlobSize = 10000000
+    maxBlobSize = 6000000
     blob = bytes(maxBlobSize)
     rc = btrieveFile.RecordRetrieveChunk(recordLength, maxBlobSize, blob)
     #print(rc)
     assert(rc >= 0)
 
-    print(type(blob))
 
-    #myvol = imageio.volread(blob, format='mp4')
-    #savedvid = imageio.volwrite('NOBYTES.mp4', myvol, format='mp4')
-    # a volume is NOT a gernal blob of data - CANT use this
-
-    #myvid = imageio.mimread(blob, format='mp4', memtest=False)
-    
-
-    # ============================
-    # this method works but is slow
-    reader = imageio.get_reader(blob, format='mp4')
+    #neither volumen NOR mime are how you read video. use below code instead
+    # ========== use below code if you want to write mp4 file to drive ========
+    # ======= WARNING - it is SLOW =====================
+    #reader = imageio.get_reader(blob, format='mp4')
     #fps = reader.get_meta_data()
     #print(fps)
-    writer=imageio.get_writer('NOBYTES.mp4', fps=5.0)
-    for frame in reader:
-        print('in loop')
-        writer.append_data(frame)
-    writer.close()
+    #writer=imageio.get_writer('NOBYTES.mp4', fps=5.0)
+    #for frame in reader:
+    #    print('in loop')
+    #    writer.append_data(frame)
+    #writer.close()
     # ============================
     
-    #im = Image.open(io.BytesIO(blob))
-    #print(im.format)
-    #print(im.size)
-    #print(im.mode)
-    #im.save('DONT_NEED_BYTES.jpg', 'JPEG')
-    return (unPacked)
+    return ({'fixedRecord': unPacked, 'encodedVideo': base64.b64encode(blob)})  #NOTE that i return a dict 
 
 
 def insertRecord(vidBlob):
@@ -200,6 +196,16 @@ def insertRecord(vidBlob):
     else:
          print(' Append failed - status: ', rc)
     #closeTable()
+
+def fill_db():
+    for i in range(4):
+        vidlocation = '/home/pi/Desktop/smallvid' + str(i) + '.mp4'
+        realPath = os.path.realpath(vidlocation)
+        print('the path of the video is: ' + str(realPath))
+        blobFile = open(realPath, mode='rb')
+        vidBlob = blobFile.read()
+        blobFile.close()
+        insertRecord(vidBlob)
     
 
 
@@ -218,14 +224,18 @@ def closeTable():
 
 
 if __name__ == '__main__':
-    vidlocation = '/home/pi/Desktop/jsVidTest/myMovie.mp4'
-    realPath = os.path.realpath(vidlocation)
-    print('the path of the video is: ' + str(realPath))
-    blobFile = open(realPath, mode='rb')
-    vidBlob = blobFile.read()
-    blobFile.close()
+    #vidlocation = '/home/pi/Desktop/smallvid0.mp4'
+    #vidlocation = '/home/pi/Desktop/smallvid1.mp4'
+    #vidlocation = '/home/pi/Desktop/smallvid2.mp4'
+    #vidlocation = '/home/pi/Desktop/smallvid3.mp4'
+    #realPath = os.path.realpath(vidlocation)
+    #print('the path of the video is: ' + str(realPath))
+    #blobFile = open(realPath, mode='rb')
+    #vidBlob = blobFile.read()
+    #blobFile.close()
     #insertRecord(vidBlob)
-    Data = select_all()
+    fill_db()
+    Data = select_fixedRecords()
     print(Data)
     #lastRow = get_last()
     #print(lastRow)

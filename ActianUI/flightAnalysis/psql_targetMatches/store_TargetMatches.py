@@ -9,16 +9,28 @@ from datetime import datetime
 from time import strftime
 import struct
 import imageio
-#import visvis as vv
+#import visvis as vv #DONT use visvis on rPi look at documentation why
 
 
 
+#I have the below code so that no matter where i run this file 
+#it will be able to import the correct files form the correct places
 print(os.getcwd())
-#sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
-sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
-import btrievePython as btrv
-#os.chdir('../../btrieveFiles')
-os.chdir('../btrieveFiles')
+curdir = os.getcwd()
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_targetMatches'):
+    sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../../btrieveFiles')
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    sys.path.insert(1, './swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('./btrieveFiles')
+else :
+    sys.path.insert(1, '../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
+    import btrievePython as btrv
+    os.chdir('../btrieveFiles')
+
+
 #there are two I terms because the header of the blob files
 #is comprised of 2 intergers - one for the offset of the 
 #blob from where the record currently is (should be the length of
@@ -31,11 +43,13 @@ os.chdir('../btrieveFiles')
 #d = double (8bytes)
 #s = char
 
-btrieveFileName = 'TargetMatches.mkd'
-recordFormat = '<idd30sII' 
+#btrieveFileName = 'TargetMatches.mkd'
+btrieveFileName = 'TMatches.mkd'
+recordFormat = '<idd30sIIii' 
+# key, lat, lng, title, blobOffset, blobSize, video1, video2
 #NO null byte B's in b/n columns because DDF builder doesnt like those
 #identity, lat, lng, title, blobOffset, blobSize
-recordLength = 58
+recordLength = 66
 #the above settings are for when you want to construct entire table in 
 #btrieve and then go back into pcc to do ddf building
 
@@ -86,39 +100,40 @@ if (rc == btrv.Btrieve.STATUS_CODE_FILE_NOT_FOUND):
 print('File Open Successfull!')
 
 
-def select_all():
+def select_fixedRecords():
     selectALL = []
-    #recordFormat = '<idd30sII'
-    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
+    #recordFormat = '<idd30sIIii'
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     print(readLength)
     while (readLength > 0):
-        humanReadable_record = (struct.unpack(recordFormat, record))
+        unpacked_record = (struct.unpack(recordFormat, record))
         readLength = btrieveFile.RecordRetrieveNext(record, 0)
-        selectALL.append(humanReadable_record)
+        selectALL.append(unpacked_record)
     return (selectALL)
 
 
-def get_images():
-    #selectALL = []
-    #recordFormat = '<idd30sII'
-    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
+def select_all():
+    #recordFormat = '<idd30sIIii'
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
-    print(readLength)
+    #print(readLength)
     maxBlobSize = 1024 * 1024
     blobArray = []
+    fixedRecords = []
+
     while (readLength > 0):
-        humanReadable_record = (struct.unpack(recordFormat, record))
-        print(humanReadable_record)
-        readLength = btrieveFile.RecordRetrieveNext(record, 0)
-        #print(readLength)
-        #selectALL.append(humanReadable_record)
-        blob = bytes(maxBlobSize)
+        unpacked_record = (struct.unpack(recordFormat, record))
+        print(unpacked_record)
+        fixedRecords.append(unpacked_record)
+        blob = bytes(maxBlobSize)  #we want to create a new empty blob each loop to fill with each new image
         rc = btrieveFile.RecordRetrieveChunk(recordLength, maxBlobSize, blob)
         blobArray.append(base64.b64encode(blob))  #NOTE the binary image data NEEDS to be ascii encoded to prevent corruption
+        readLength = btrieveFile.RecordRetrieveNext(record, 0)
+        #print(readLength)
     #print(rc)
     assert(rc >= 0)
-    return (blobArray)
+    return ({'fixedRecords': fixedRecords, 'encodedImages': blobArray})  #NOTE that i return a dict 
 
 
 
@@ -126,14 +141,14 @@ def get_last():
     # =============================
     # if you are trying to get a specific record based on index
     identifier=1
-    record = struct.pack(recordFormat, identifier, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0)
+    record = struct.pack(recordFormat, identifier, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
     rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
     print(rc)
     assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
-    unPacked = struct.unpack(recordFormat, record)
+    unpacked_record = struct.unpack(recordFormat, record)
     print('the record we are looking at is: ')
     print(' ==================================')
-    print(unPacked)
+    print(unpacked_record)
     print(' ==================================')
     # ===================================
     # my method of record retireval
@@ -148,20 +163,15 @@ def get_last():
     #print(rc)
     assert(rc >= 0)
     
-    im = imageio.imread(blob)
-    saved = imageio.imwrite('NOBYTES.jpg', im, format='jpg')
-    #vv.imshow(im)
-    #print(type(im))
-    #vv.imshow(im)
-    #im = Image.open(io.BytesIO(blob))
-    #print(im.format)
-    #print(im.size)
-    #print(im.mode)
-    #im.save('DONT_NEED_BYTES.jpg', 'JPEG')
-    return (unPacked)
+    # ============ use lines below if you want to write image to filesystem =========
+    #im = imageio.imread(blob)
+    #saved = imageio.imwrite('NOBYTES.jpg', im, format='jpg')
+    # ===================================
+
+    return ({'fixedRecord': unpacked_record, 'encodedImage': base64.b64encode(blob)})
 
 
-def insertRecord(lat, lng, title, imgBlob):
+def insertRecord(lat, lng, title, imgBlob, vid1_key, vid2_key):
     #realPath = os.path.realpath(imglocation)
     #print('the path of the image is: ' + str(realPath))
     #blobFile = open(realPath, mode='rb')
@@ -172,7 +182,7 @@ def insertRecord(lat, lng, title, imgBlob):
     blobOffset = recordLength
 
     #recordFormat = '<iBdBdB30sBII'
-    record = struct.pack(recordFormat, 0, lat, lng, title.ljust(30).encode('UTF-8'), blobOffset, blobSize)
+    record = struct.pack(recordFormat, 0, lat, lng, title.ljust(30).encode('UTF-8'), blobOffset, blobSize, vid1_key, vid2_key)
     rc = btrieveFile.RecordCreate(record)
     if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):
          print(' Insert successful!')
@@ -186,6 +196,19 @@ def insertRecord(lat, lng, title, imgBlob):
     else:
          print(' Append failed - status: ', rc)
     #closeTable()
+
+
+def fill_db():
+    vidArray = [[1,2], [3,4], [2,3], [1,2]]  #NOTE that each pair has to be 1 digit apart ie CANT do [2,4] or [1,3]
+    for i in range(4):
+        imglocation = '/home/pi/Desktop/img' + str(i) + '.jpg'
+        imgID = 'img' + str(i)
+        realPath = os.path.realpath(imglocation)
+        print('the path of the video is: ' + str(realPath))
+        blobFile = open(realPath, mode='rb')
+        imgBlob = blobFile.read()
+        blobFile.close()
+        insertRecord(501, 667, imgID, imgBlob, vidArray[i][0], vidArray[i][1])
     
 
 
@@ -207,6 +230,7 @@ if __name__ == '__main__':
     #os.chdir('../../btrieveFiles')
     #imglocation = '../javascriptUI/heroImages/m1.jpg'
     #imglocation = '/home/pi/Desktop/red-x.jpg'
+    #imglocation = '/home/pi/Desktop/foo2.jpg'
     #imglocation = '/home/pi/Desktop/pixhawk2.jpg'
     #imglocation = '/home/pi/Desktop/cropped_panda.jpg'
     #realPath = os.path.realpath(imglocation)
@@ -214,14 +238,16 @@ if __name__ == '__main__':
     #blobFile = open(realPath, mode='rb')
     #imgBlob = blobFile.read()
     #blobFile.close()
-    #insertRecord(501, 667, 'panda', imgBlob)
-    Data = select_all()
+    #insertRecord(501, 667, 'panda', imgBlob, 5, 6)
+    fill_db()
+    Data = select_fixedRecords()
     print(Data)
     #lastRow = get_last()
     #print(lastRow)
-    imgList = get_images()
-    for i in range(len(imgList)):
-        print(len(imgList[i]))
+    #imgList = select_all()
+    #print(imgList)
+    #for i in range(len(imgList)):
+    #    print(len(imgList[i]))
 
     closeTable()
 

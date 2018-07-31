@@ -21,14 +21,16 @@ app = Flask(__name__)
 
 @app.route('/api/imgBytes')
 def get_imageByte():
-    im = open('foo2.jpg', 'rb')
+    im = open('../../../foo2.jpg', 'rb')
     imData = im.read()
-    print('making string')
-    encoded = base64.b64encode(imData)
-    print(type(encoded))
+    print(type(imData))
+    #print('making string')
+    #encoded = base64.b64encode(imData)
+    #print(type(encoded))
     data = []
     data.append('welcome to Kavons api')
-    data.append(encoded)
+    #data.append(encoded)
+    data.append(imData)
     #apiFriendly = str(imData) 
     imDict = {'results': data}
 
@@ -38,10 +40,10 @@ def get_imageByte():
     # ========================
     
     # =====================
-    #jsonDict = jsonify(imDict)
-    #finalResponse = make_response(jsonDict)
-    #finalResponse.headers['Access-Control-Allow-Origin'] = '*'
-    #return(finalResponse)
+    jsonDict = jsonify(imDict)
+    finalResponse = make_response(jsonDict)
+    finalResponse.headers['Access-Control-Allow-Origin'] = '*'
+    return(finalResponse)
     # ========================
     
 
