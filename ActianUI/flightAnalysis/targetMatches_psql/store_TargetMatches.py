@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 import base64
 import io
@@ -17,7 +17,7 @@ import imageio
 #it will be able to import the correct files form the correct places
 print(os.getcwd())
 curdir = os.getcwd()
-if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_targetMatches'):
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/targetMatches_psql' or curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/movidius'):
     sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
     import btrievePython as btrv
     os.chdir('../../btrieveFiles')
@@ -44,12 +44,12 @@ else :
 #s = char
 
 #btrieveFileName = 'TargetMatches.mkd'
-btrieveFileName = 'TMatches.mkd'
-recordFormat = '<idd30sIIii' 
-# key, lat, lng, title, blobOffset, blobSize, video1, video2
+btrieveFileName = 'TargMatches.mkd'
+recordFormat = '<idd30sIIiiBBBB' 
+# key, lat, lng, title, blobOffset, blobSize, video1, video2, am/pm, sec, min, hour
 #NO null byte B's in b/n columns because DDF builder doesnt like those
 #identity, lat, lng, title, blobOffset, blobSize
-recordLength = 66
+recordLength = 70
 #the above settings are for when you want to construct entire table in 
 #btrieve and then go back into pcc to do ddf building
 
@@ -103,7 +103,7 @@ print('File Open Successfull!')
 def select_fixedRecords():
     selectALL = []
     #recordFormat = '<idd30sIIii'
-    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0, 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     print(readLength)
     while (readLength > 0):
@@ -115,7 +115,7 @@ def select_fixedRecords():
 
 def select_all():
     #recordFormat = '<idd30sIIii'
-    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
+    record = struct.pack(recordFormat, 0, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0, 0, 0, 0, 0)
     readLength = btrieveFile.RecordRetrieveFirst(btrv.Btrieve.INDEX_1, record, 0)
     #print(readLength)
     maxBlobSize = 1024 * 1024
@@ -141,7 +141,7 @@ def get_last():
     # =============================
     # if you are trying to get a specific record based on index
     identifier=1
-    record = struct.pack(recordFormat, identifier, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0)
+    record = struct.pack(recordFormat, identifier, 0, 0, ''.ljust(30).encode('UTF-8'), 0, 0, 0, 0, 0, 0, 0, 0)
     rc = btrieveFile.KeyRetrieve(btrv.Btrieve.COMPARISON_EQUAL, btrv.Btrieve.INDEX_1, record)
     print(rc)
     assert(rc == btrv.Btrieve.STATUS_CODE_NO_ERROR)
@@ -171,7 +171,7 @@ def get_last():
     return ({'fixedRecord': unpacked_record, 'encodedImage': base64.b64encode(blob)})
 
 
-def insertRecord(lat, lng, title, imgBlob, vid1_key, vid2_key):
+def insertRecord(lat, lng, title, imgBlob, vid1_key, vid2_key, secnds, mins, hour):
     #realPath = os.path.realpath(imglocation)
     #print('the path of the image is: ' + str(realPath))
     #blobFile = open(realPath, mode='rb')
@@ -182,7 +182,7 @@ def insertRecord(lat, lng, title, imgBlob, vid1_key, vid2_key):
     blobOffset = recordLength
 
     #recordFormat = '<iBdBdB30sBII'
-    record = struct.pack(recordFormat, 0, lat, lng, title.ljust(30).encode('UTF-8'), blobOffset, blobSize, vid1_key, vid2_key)
+    record = struct.pack(recordFormat, 0, lat, lng, title.ljust(30).encode('UTF-8'), blobOffset, blobSize, vid1_key, vid2_key, 1, secnds, mins, hour)
     rc = btrieveFile.RecordCreate(record)
     if (rc == btrv.Btrieve.STATUS_CODE_NO_ERROR):
          print(' Insert successful!')
@@ -208,7 +208,7 @@ def fill_db():
         blobFile = open(realPath, mode='rb')
         imgBlob = blobFile.read()
         blobFile.close()
-        insertRecord(501, 667, imgID, imgBlob, vidArray[i][0], vidArray[i][1])
+        insertRecord(501, 667, imgID, imgBlob, vidArray[i][0], vidArray[i][1], 17, 13, 14)
     
 
 
@@ -223,23 +223,11 @@ def closeTable():
 # one PSQL folder, but that means in scripts i have to change dirs to the files
 # and then at the end of the script change back ---------- actually why do i have to
 # change back? - gonna comment this out for now
-#os.chdir('../dataCollection/psql_targetMatches')
+os.chdir(curdir)   #NOTE how hacky this line is
 
 
 if __name__ == '__main__':
-    #os.chdir('../../btrieveFiles')
-    #imglocation = '../javascriptUI/heroImages/m1.jpg'
-    #imglocation = '/home/pi/Desktop/red-x.jpg'
-    #imglocation = '/home/pi/Desktop/foo2.jpg'
-    #imglocation = '/home/pi/Desktop/pixhawk2.jpg'
-    #imglocation = '/home/pi/Desktop/cropped_panda.jpg'
-    #realPath = os.path.realpath(imglocation)
-    #print('the path of the image is: ' + str(realPath))
-    #blobFile = open(realPath, mode='rb')
-    #imgBlob = blobFile.read()
-    #blobFile.close()
-    #insertRecord(501, 667, 'panda', imgBlob, 5, 6)
-    fill_db()
+    #fill_db()
     Data = select_fixedRecords()
     print(Data)
     #lastRow = get_last()

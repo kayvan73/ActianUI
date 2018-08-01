@@ -4,11 +4,27 @@ import sys
 import os
 
 
+#I have the below code so that no matter where i run this file 
+#it will be able to import the correct files form the correct places
+curdir = os.getcwd()
+print('the cwd is: ' + curdir)
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flask_api'):
+    print('we at flask_api/')
+    sys.path.insert(1, '../flightAnalysis/targetMatches_psql/')
+    import store_TargetMatches as targetTb
+    assert(os.getcwd() == curdir)
+    sys.path.insert(1, '../flightAnalysis/fullReport_psql/')
+    import videoTable_py3_access as videoTb
+    assert(os.getcwd() == curdir)
+elif (curdir == '/home/pi/Desktop/ActianUI/ActianUI'):
+    print('we at home folder')
+    sys.path.insert(1, './flightAnalysis/targetMatches_psql/')
+    import store_TargetMatches as targetTb
+    assert(os.getcwd() == curdir)
+    sys.path.insert(1, './flightAnalysis/fullReport_psql/')
+    import videoTable_py3_access as videoTb
+    assert(os.getcwd() == curdir)
 print(os.getcwd())
-sys.path.insert(1, '../flightAnalysis/psql_targetMatches/')
-import store_TargetMatches as targetTb
-sys.path.insert(1, '../flightAnalysis/psql_fullReport/')
-import videoTable_py3_access as videoTb
 
 
 

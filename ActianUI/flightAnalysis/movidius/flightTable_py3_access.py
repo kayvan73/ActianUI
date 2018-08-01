@@ -8,7 +8,7 @@ import struct
 
 print(os.getcwd())
 curdir = os.getcwd()
-if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_fullReport'):
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/movidius'):
     sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
     import btrievePython as btrv
     os.chdir('../../btrieveFiles')
@@ -108,6 +108,9 @@ def closeTable():
          print('File closed successful!')
     else:
          print('File close failed - status: ', rc)
+
+
+os.chdir('../flightAnalysis/movidius')   #NOTE how hacky this line is
 
 
 if __name__ == '__main__':

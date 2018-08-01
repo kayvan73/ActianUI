@@ -16,7 +16,7 @@ echo ----------------------------------------:
 su - psql
 cd ${path4}
 pwd
-${path4}/psql_api/PSQL_http_api.py &  #directly execute the python-psql api
+${path4}/flask_api/flask_Http_api.py &  #directly execute the python-psql api
 #switching to psql user changes the direcotry, so I have to store the correct absolute path
 #and then send it after user change
 

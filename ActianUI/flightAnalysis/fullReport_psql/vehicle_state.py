@@ -27,7 +27,7 @@ else :
 print(os.getcwd())
 
 #test that you can connect to the table
-data = flightTb.select_all_flightData()
+data = flightTb.select_all()
 print(data)
 
 # Connect to the Vehicle.
@@ -60,7 +60,8 @@ print( "=======================================")
 #print( "starting imgRec script in background")
 #print( "=======================================")
 #subprocess.call(['/home/pi/Desktop/flightTests/analyzeImgs.py', '&'])
-for i in range(180):
+#for i in range(180):
+for i in range(50):
     print ("...................")
     print (" Global Location (relative altitude): %s" % vehicle.location.global_frame)
     flightTb.insertRecord(vehicle.location.global_frame.lat, vehicle.location.global_frame.lon)

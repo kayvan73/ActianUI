@@ -14,7 +14,7 @@
 //**************************************************************
 //*************************************************************
 
-var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, markerImage){  //================changed this one
+var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, img1blob, vid1blob, vid2blob){  //================changed this one
 
 	//console.log(markerImage)
     console.log('adding new marker');
@@ -30,14 +30,18 @@ var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, mar
     //  1) the display div now cahnges from display:none to display:inline
     this.display_markerData = function(){
         var curImage = document.getElementById('selected_img')
+        var curVideo1 = document.getElementById('selected_video1')
+        var curVideo2 = document.getElementById('selected_video2')
         var divImg = document.getElementById('divImg');
-		var curLat = document.getElementById('lat_display');
+	var curLat = document.getElementById('lat_display');
         var curLng = document.getElementById('lng_display');
         curLat.setAttribute('value', this.GoogleMarker.latitude);
         curLng.setAttribute('value', this.GoogleMarker.longitude);
-		console.log(this.GoogleMarker.latitude)
-		console.log(this.GoogleMarker.title);
-        curImage.src = this.GoogleMarker.imageLocation;   //=============changed this one
+	console.log(this.GoogleMarker.latitude)
+	console.log(this.GoogleMarker.title);
+        curImage.src = this.GoogleMarker.img1url;   //=============changed this one
+        curVideo1.src = this.GoogleMarker.vid1url;
+        curVideo2.src = this.GoogleMarker.vid2url;
         //curImage.src = '/home/pi/Desktop/heroImages/m1.jpg'   //=============changed this one
         divImg.style.display = 'inline';
         current_MarkerArray.currentMarker = this.GoogleMarker; //tracker object
@@ -55,14 +59,16 @@ var NewMarker = function(markerTitle, markerLocation, timeOfPicture, status, mar
     //  1) marker is placed on the map
     //  2) marker and its properties pushed to our current_MarkerArray object
     this.GoogleMarker = new google.maps.Marker({
-		latitude : markerLocation.lat,
-		longitude : markerLocation.lng,
+	latitude : markerLocation.lat,
+	longitude : markerLocation.lng,
         position: {
             lat: markerLocation.lat,
             lng: markerLocation.lng
         },
         label: markerTitle,
-		imageLocation: markerImage,
+	img1url: img1blob,
+        vid1url: vid1blob,
+        vid2url: vid2blob,
         title : markerTitle,
         time : timeOfPicture,
         status: status,

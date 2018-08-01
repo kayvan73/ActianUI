@@ -135,6 +135,17 @@ function NewPage() {
     //};
 
 
+    this.createVid = function(div_id, vid_src, vid_id){
+        var video= document.createElement('video');
+        video.width = '200';
+        video.height = '200';
+        video.src = vid_src;
+        video.controls = true;
+        video.id = vid_id;
+        document.getElementById(div_id).appendChild(video);
+    }
+
+
     //PURPOSE
     //  1) When use clicks on specific marker, correspding image/data will display bc of this method
     //OUTPUT
@@ -146,6 +157,8 @@ function NewPage() {
         var lat_display = this.addInputs('divImg', 'lat_display', 'number', '');
         var lng_display = this.addInputs('divImg', 'lng_display', 'number', '');
         this.addLineBreak('divImg');
+        this.createVid('divImg', '', 'selected_video1', 200, 200);
+        this.createVid('divImg', '', 'selected_video2', 200, 200);
         //var deleteButt = this.addInputs('divImg', 'deleteButt', 'submit', 'Delete Marker');
         //this.addListener2_deleteButt();
         document.getElementById('divImg').style.display = 'none';

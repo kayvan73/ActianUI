@@ -16,7 +16,7 @@ import imageio
 #it will be able to import the correct files form the correct places
 print(os.getcwd())
 curdir = os.getcwd()
-if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/psql_fullReport'):
+if (curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/movidius' or curdir == '/home/pi/Desktop/ActianUI/ActianUI/flightAnalysis/fullReport_psql'):
     sys.path.insert(1, '../../swigFiles/swigFiles_py3')  #need these to talk to btrieve2
     import btrievePython as btrv
     os.chdir('../../btrieveFiles')
@@ -132,6 +132,15 @@ def select_range(lowerRange, upperRange):
     return (blobArray)  #NOTE that i return a dict 
 
 
+def get_LastRecordID():
+    record = struct.pack(recordFormat, 0, 0, 0)
+    readLength = btrieveFile.RecordRetrieveLast(btrv.Btrieve.INDEX_1, record, 0)
+    assert(readLength >= 0)
+    unpacked_record = struct.unpack(recordFormat, record)
+    #print(type(unpacked_record[0]))
+    #print(unpacked_record[0])
+    return(unpacked_record[0])
+
 
 # =============================
 # if you are trying to get a specific record based on index
@@ -220,20 +229,9 @@ def closeTable():
 # one PSQL folder, but that means in scripts i have to change dirs to the files
 # and then at the end of the script change back ---------- actually why do i have to
 # change back? - gonna comment this out for now
-#os.chdir('../dataCollection/psql_targetMatches')
-
+os.chdir(curdir)   #NOTE how hacky this line is
 
 if __name__ == '__main__':
-    #vidlocation = '/home/pi/Desktop/smallvid0.mp4'
-    #vidlocation = '/home/pi/Desktop/smallvid1.mp4'
-    #vidlocation = '/home/pi/Desktop/smallvid2.mp4'
-    #vidlocation = '/home/pi/Desktop/smallvid3.mp4'
-    #realPath = os.path.realpath(vidlocation)
-    #print('the path of the video is: ' + str(realPath))
-    #blobFile = open(realPath, mode='rb')
-    #vidBlob = blobFile.read()
-    #blobFile.close()
-    #insertRecord(vidBlob)
     fill_db()
     Data = select_fixedRecords()
     print(Data)
