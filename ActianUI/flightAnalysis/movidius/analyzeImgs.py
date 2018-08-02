@@ -37,6 +37,7 @@ for i in range(4):
 
     # ========== lat, lng, and vid clip extraction ==============
     GPS = flightTb.get_last()
+    print(GPS)
     currentVidID = videoTb.get_LastRecordID()
     assert(type(currentVidID) == int)
     # ========================================================

@@ -44,7 +44,7 @@ else :
 #s = char
 
 #btrieveFileName = 'TargetMatches.mkd'
-btrieveFileName = 'TargMatches.mkd'
+btrieveFileName = 'GtMatches.mkd'
 recordFormat = '<idd30sIIiiBBBB' 
 # key, lat, lng, title, blobOffset, blobSize, video1, video2, am/pm, sec, min, hour
 #NO null byte B's in b/n columns because DDF builder doesnt like those

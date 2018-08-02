@@ -25,7 +25,7 @@ print(os.getcwd())
 
 
 
-btrieveFileName = 'FullFlightReport.mkd'
+btrieveFileName = 'FullReport.mkd'
 recordFormat = '<iddBBBB'
 #recordFormat = '<iBdBdBBBBB'  #this is the old format when i was obsesses w/ PCC compliance
 #i = integer (for the IDENTITY, 4bytes)
